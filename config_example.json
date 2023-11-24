@@ -1,0 +1,13 @@
+{
+    "token": "",
+    "endpoints": [
+        {
+            "url": "http://localhost:3000",
+            "token": ""
+        },
+        {
+            "url": "http://localhost:3001",
+            "token": ""
+        }
+    ]
+}
