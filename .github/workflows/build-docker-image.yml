@@ -9,7 +9,7 @@ on:
       - "docker-compose.example.yml"
       - "docker-compose.yml"
       - "config.example.toml"
-      - "config_example.json"c
+      - "config_example.json"
     branches:
       - master
   pull_request:
