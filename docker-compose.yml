@@ -6,7 +6,7 @@ networks:
 
 services:
   deeplx:
-    image: nerdneils/deeplx-load-balance:latest
+    image: nerdneils/deeplx-load-balancer:latest
     restart: unless-stopped
     networks:
       - proxy

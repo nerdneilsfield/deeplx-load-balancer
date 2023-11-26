@@ -43,7 +43,7 @@ Run the program with the -config flag followed by your configuration file path.
 使用 -config 标志运行程序，后面跟上您的配置文件路径。
 
 ```bash
-go run loadbalancer.go -config ./config.json
+go run main.go -config ./config.json
 ```
 
 ### Using Docker | 基于 Docker 进行使用
@@ -52,7 +52,7 @@ An official docker image was provided: `nerdneils/deeplx-load-balancer`.
 提供了一个官方的 docker 镜像: `nerdneils/deeplx-load-balancer`。
 
 ```bash
-docker run -it -v ${PWD}/config.json:/etc/deeplx-load-balancer-config.json -p 1188:1188 nerdneils/deeplx-load-balance
+docker run -it -v ${PWD}/config.json:/etc/deeplx-load-balancer-config.json -p 1188:1188 nerdneils/deeplx-load-balancer
 ```
 
 ### Using docker-compose | 基于 docker-compose 进行使用
