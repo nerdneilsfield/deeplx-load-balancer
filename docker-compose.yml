@@ -1,0 +1,26 @@
+version: '3.3'
+
+networks:
+  proxy:
+    external: true
+
+services:
+  deeplx:
+    image: nerdneils/deeplx-load-balance:latest
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - ./config.json:/etc/deeplx-load-balancer-config.json
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - "traefik.http.routers.deeplx-load-balancer.entrypoints=http"
+      - "traefik.http.routers.deeplx-load-balancer.rule=Host(`your-domain`)"
+      # - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.deeplx-load-balancer.middlewares=https-redirect@docker"
+      - traefik.http.routers.deeplx-load-balancer-secure.entrypoints=https
+      - "traefik.http.routers.deeplx-load-balancer-secure.rule=Host(`your-domain`)"
+      - traefik.http.routers.deeplx-load-balancer-secure.tls=true
+      - traefik.http.routers.deeplx-load-balancer-secure.tls.certresolver=cloudflare
+      - "traefik.http.services.deeplx-load-balancer.loadbalancer.server.port=1188"
