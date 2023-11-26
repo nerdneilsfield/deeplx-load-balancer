@@ -81,12 +81,18 @@ func DoRequest(endpoint DeepLXEndpoint, body []byte) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")                                              // 允许任何源
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")               // 允许的方法
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With") // 允许的标头
+}
+
 func HelloworldHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "DeepLx Load Balancer v0.1, https://github.com/nerdneilsfield/deeplx-load-balancer")
 }
 
 func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
-
+	enableCors(&w)
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
