@@ -93,6 +93,10 @@ func HelloworldHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -161,10 +165,10 @@ func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read response", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	for k, v := range resp.Header {
 		w.Header()[k] = v
 	}
+	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(body)
 	if err != nil {
 		// 处理写入错误
