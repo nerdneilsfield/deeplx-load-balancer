@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -64,19 +65,17 @@ func removeEndpoint(endpoints []DeepLXEndpoint, endpoint DeepLXEndpoint) []DeepL
 	return endpoints
 }
 
-func DoRequest(endpoint DeepLXEndpoint, token string, r *http.Request) (*http.Response, error) {
+func DoRequest(endpoint DeepLXEndpoint, body []byte) (*http.Response, error) {
 	// copy request
-	req, err := http.NewRequest("POST", endpoint.Url+"/translate", r.Body)
+	req, err := http.NewRequest("POST", endpoint.Url+"/translate", bytes.NewBuffer(body))
 	if err != nil {
 		log.Println("Failed to create request:", err)
 		return nil, err
 	}
 	// add auth header
-	for k, v := range r.Header {
-		req.Header[k] = v
-	}
-	if token != "" {
-		req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+	if endpoint.Token != "" {
+		req.Header.Add("Authorization", "Bearer "+endpoint.Token)
 	}
 	// send request
 	return http.DefaultClient.Do(req)
@@ -87,15 +86,43 @@ func HelloworldHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if config.Token != "" {
+		// check auth header
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Authorization required", http.StatusUnauthorized)
+			return
+		}
+		if authHeader != "Bearer "+config.Token {
+			http.Error(w, "Authorization failed", http.StatusUnauthorized)
+			return
+		}
+	}
+
 	endpoints := make([]DeepLXEndpoint, len(config.Endpoints))
 	copy(endpoints, config.Endpoints)
 
 	var resp *http.Response
 	var err error
 
+	// 读取请求
+	defer r.Body.Close()
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request", http.StatusInternalServerError)
+		return
+	}
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	for len(endpoints) > 0 {
 		endpoint := RandomEndpoint(endpoints)
-		resp, err = DoRequest(endpoint, config.Token, r)
+		resp, err = DoRequest(endpoint, bodyBytes)
 
 		if err != nil || resp.StatusCode != 200 {
 			// 从 endpoints 列表中移除失败的 endpoint
