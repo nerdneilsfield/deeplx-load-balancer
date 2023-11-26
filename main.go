@@ -161,10 +161,10 @@ func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read response", http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	for k, v := range resp.Header {
 		w.Header()[k] = v
 	}
-	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(body)
 	if err != nil {
 		// 处理写入错误
