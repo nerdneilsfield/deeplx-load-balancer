@@ -164,7 +164,7 @@ func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
 	for k, v := range resp.Header {
 		w.Header()[k] = v
 	}
-	w.WriteHeader(resp.StatusCode)
+	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(body)
 	if err != nil {
 		// 处理写入错误
