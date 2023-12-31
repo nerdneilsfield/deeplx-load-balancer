@@ -74,6 +74,14 @@ func DoRequest(endpoint DeepLXEndpoint, body []byte) (*http.Response, error) {
 	}
 	// add auth header
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0")
+	req.Header.Add("Sec-Fetch-Site", "none")
+	req.Header.Add("Sec-Fetch-Mode", "cors")
+	req.Header.Add("Sec-Fetch-Dest", "empty")
+	req.Header.Add("Sec-Ch-Ua", "\"Chromium\";v=\"94\", \"Microsoft Edge\";v=\"94\", \";Not A Brand\";v=\"99\"")
+	req.Header.Add("Sec-Ch-Ua-Mobile", "?0")
+	req.Header.Add("Sec-Ch-Ua-Platform", "\"macOS\"")
+	req.Header.Add("Upgrade-Insecure-Requests", "1")
 	if endpoint.Token != "" {
 		req.Header.Add("Authorization", "Bearer "+endpoint.Token)
 	}
@@ -88,7 +96,7 @@ func enableCors(w *http.ResponseWriter) {
 }
 
 func HelloworldHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "DeepLx Load Balancer v0.1, https://github.com/nerdneilsfield/deeplx-load-balancer")
+	fmt.Fprintf(w, "DeepLx Load Balancer v0.2, https://github.com/nerdneilsfield/deeplx-load-balancer")
 }
 
 func LoadBalancerHandler(w http.ResponseWriter, r *http.Request) {
