@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -26,6 +27,8 @@ type DeepLXBalancerConfig struct {
 var configFile = flag.String("config", "config.json", "Path to config file")
 
 var config = DeepLXBalancerConfig{}
+
+var client *http.Client
 
 func LoadConfig(path string) {
 	// open config file
@@ -82,11 +85,13 @@ func DoRequest(endpoint DeepLXEndpoint, body []byte) (*http.Response, error) {
 	req.Header.Add("Sec-Ch-Ua-Mobile", "?0")
 	req.Header.Add("Sec-Ch-Ua-Platform", "\"macOS\"")
 	req.Header.Add("Upgrade-Insecure-Requests", "1")
+	req.Header.Add("Authority", "www.deepl.com")
+	req.Header.Add("Pragma", "no-cache")
 	if endpoint.Token != "" {
 		req.Header.Add("Authorization", "Bearer "+endpoint.Token)
 	}
 	// send request
-	return http.DefaultClient.Do(req)
+	return client.Do(req)
 }
 
 func enableCors(w *http.ResponseWriter) {
@@ -189,6 +194,18 @@ func main() {
 
 	// Load config
 	LoadConfig(*configFile)
+
+	defaultCipherSuites := []uint16{0xc02f, 0xc030, 0xc02b, 0xc02c, 0xcca8, 0xcca9, 0xc013, 0xc009,
+		0xc014, 0xc00a, 0x009c, 0x009d, 0x002f, 0x0035, 0xc012, 0x000a}
+	client = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				CipherSuites: append(defaultCipherSuites[8:], defaultCipherSuites[:8]...),
+				MaxVersion:   tls.VersionTLS12,
+			},
+			ForceAttemptHTTP2: false,
+		},
+	}
 
 	// Start balancer
 	// StartBalancer(config)
